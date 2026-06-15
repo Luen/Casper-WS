@@ -84,8 +84,9 @@ into the {body} of the default.hbs template --}}
     (function () {
         var all = parseInt(document.getElementById('all').textContent, 10);
         var free = parseInt(document.getElementById('free').textContent, 10);
-        if (all > 0 && !isNaN(free)) {
-            document.getElementById('percentage').textContent = Math.round(free / all * 100) + '%';
+        var members = parseInt(document.getElementById('members').textContent, 10);
+        if (all > 0 && !isNaN(free) && !isNaN(members)) {
+            document.getElementById('percentage').textContent = Math.round((free + members) / all * 100) + '%';
         }
     })();
     </script>
