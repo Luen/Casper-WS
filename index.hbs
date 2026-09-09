@@ -106,11 +106,15 @@ into the {body} of the default.hbs template --}}
 
     <section class="home-section">
         <h2 class="home-section-title"><a href="https://maps.wanderstories.space/">Find Your Adventure</a></h2>
-        <div id="ws-map" style="width:100%;height:450px;"></div>
+        <div id="ws-article-search"></div>
+        <div id="ws-map" style="width:100%;height:450px;margin-top:1.6rem;"></div>
+        <div id="ws-article-search-results"></div>
+        <script data-cfasync="false" src="https://maps.wanderstories.space/ws-article-search.js?v=1.3.0"></script>
         <script data-cfasync="false">
         (function () {
             var mapOptions = {divid:'ws-map',zoom:7,lat:'-18.245',lon:'146.71143',mapDownloads:false,weather:false,mapAlerts:false,defaultLayer:"outdoor",baseLayers:['outdoor','qtopo'],overlays:[]};
             var mapStarted = false;
+            var searchStarted = false;
 
             function initWsMap() {
                 if (mapStarted || typeof makeMap !== 'function') return false;
@@ -120,52 +124,34 @@ into the {body} of the default.hbs template --}}
                 return true;
             }
 
+            function initSearch() {
+                if (searchStarted || typeof wsArticleSearch !== 'function') return false;
+                if (!document.getElementById('ws-article-search')) return false;
+                wsArticleSearch({
+                    container: '#ws-article-search',
+                    resultsContainer: '#ws-article-search-results',
+                    baseUrl: 'https://maps.wanderstories.space',
+                    pageSize: 12,
+                    hideHeading: true,
+                    mapDivid: 'ws-map'
+                });
+                searchStarted = true;
+                return true;
+            }
+
             function scheduleInit() {
-                if (initWsMap()) return;
                 var tries = 0;
                 var timer = setInterval(function () {
-                    if (initWsMap() || ++tries > 100) clearInterval(timer);
+                    initWsMap();
+                    initSearch();
+                    if ((mapStarted && searchStarted) || ++tries > 100) clearInterval(timer);
                 }, 100);
             }
 
-            /* main.js loads in ghost_foot after this block — wait for scripts + stylesheets */
             if (document.readyState === 'complete') {
                 scheduleInit();
             } else {
                 window.addEventListener('load', scheduleInit);
-            }
-        })();
-        </script>
-    </section>
-
-    <section class="home-section">
-        <h2 class="home-section-title">Find an adventure</h2>
-        <div id="ws-article-search"></div>
-        <script data-cfasync="false" src="https://maps.wanderstories.space/ws-article-search.js?v=1.2.9"></script>
-        <script data-cfasync="false">
-        (function () {
-            function initSearch() {
-                if (typeof wsArticleSearch !== 'function') return false;
-                if (!document.getElementById('ws-article-search')) return false;
-                wsArticleSearch({
-                    container: '#ws-article-search',
-                    baseUrl: 'https://maps.wanderstories.space',
-                    pageSize: 12,
-                    hideHeading: true
-                });
-                return true;
-            }
-            function scheduleInit() {
-                if (initSearch()) return;
-                var tries = 0;
-                var timer = setInterval(function () {
-                    if (initSearch() || ++tries > 50) clearInterval(timer);
-                }, 100);
-            }
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', scheduleInit);
-            } else {
-                scheduleInit();
             }
         })();
         </script>
